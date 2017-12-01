@@ -10,6 +10,11 @@ func New(items ...string) *S {
 	return &s
 }
 
+func (s *S) Has(i string) bool {
+	_, ok := (*s)[i]
+	return ok
+}
+
 func (s *S) Add(i string) {
 	(*s)[i] = struct{}{}
 }
