@@ -19,6 +19,17 @@ func (s *S) Len() int {
 	return len(*s)
 }
 
+func (s *S) Items() <-chan string {
+	ch := make(chan string)
+	go func() {
+		for i := range *s {
+			ch <- i
+		}
+		close(ch)
+	}()
+	return ch
+}
+
 func (s *S) Add(i string) {
 	(*s)[i] = struct{}{}
 }
