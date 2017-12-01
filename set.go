@@ -15,6 +15,10 @@ func (s *S) Has(i string) bool {
 	return ok
 }
 
+func (s *S) Len() int {
+	return len(*s)
+}
+
 func (s *S) Add(i string) {
 	(*s)[i] = struct{}{}
 }
