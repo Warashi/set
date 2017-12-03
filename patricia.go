@@ -63,8 +63,8 @@ func (s *patricia) fullPATH() string {
 	}
 
 	buf := bytes.NewBuffer(make([]byte, 0, plen))
-	for _, p := range list {
-		buf.WriteString(p)
+	for i := len(list) - 1; i >= 0; i-- {
+		buf.WriteString(list[i])
 	}
 	return buf.String()
 }
