@@ -120,6 +120,7 @@ func (s *patricia) Items() <-chan string {
 				st.Push(c)
 			}
 		}
+		close(ch)
 	}()
 	return ch
 }
