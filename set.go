@@ -1,25 +1,36 @@
 package set
 
-type S map[string]struct{}
+// Interface is string set interface
+type Interface interface {
+	Has(string) bool
+	Len() int
+	Items() <-chan string
+	Add(string)
+	Delete(string)
+	Update(Interface)
+}
 
-func New(items ...string) *S {
-	s := make(S)
+type set map[string]struct{}
+
+// New returns new set based on map[string]struct{}
+func New(items ...string) Interface {
+	s := make(set)
 	for _, item := range items {
 		s[item] = struct{}{}
 	}
 	return &s
 }
 
-func (s *S) Has(i string) bool {
+func (s *set) Has(i string) bool {
 	_, ok := (*s)[i]
 	return ok
 }
 
-func (s *S) Len() int {
+func (s *set) Len() int {
 	return len(*s)
 }
 
-func (s *S) Items() <-chan string {
+func (s *set) Items() <-chan string {
 	ch := make(chan string)
 	go func() {
 		for i := range *s {
@@ -30,43 +41,51 @@ func (s *S) Items() <-chan string {
 	return ch
 }
 
-func (s *S) Add(i string) {
+func (s *set) Add(i string) {
 	(*s)[i] = struct{}{}
 }
 
-func (s *S) Update(u *S) {
-	for i := range *u {
+func (s *set) Delete(i string) {
+	delete(*s, i)
+}
+
+func (s *set) Update(u Interface) {
+	for i := range u.Items() {
 		s.Add(i)
 	}
 }
 
-func And(a, b *S) *S {
+// And returns set which contains items in both a and b
+func And(a, b Interface) Interface {
 	s := New()
-	for i := range *a {
-		if _, ok := (*b)[i]; ok {
+	for i := range a.Items() {
+		if b.Has(i) {
 			s.Add(i)
 		}
 	}
 	return s
 }
 
-func Not(a, b *S) *S {
+// Not returns set which contains items not in b but a
+func Not(a, b Interface) Interface {
 	s := New()
-	for i := range *a {
-		if _, ok := (*b)[i]; !ok {
+	for i := range a.Items() {
+		if !b.Has(i) {
 			s.Add(i)
 		}
 	}
 	return s
 }
 
-func Or(a, b *S) *S {
+// Or returns set which contains items in either a or b
+func Or(a, b Interface) Interface {
 	s := New()
 	s.Update(a)
 	s.Update(b)
 	return s
 }
 
-func Xor(a, b *S) *S {
+// Xor returns set which contains items in either (not in b but a) or (not in a but b)
+func Xor(a, b Interface) Interface {
 	return Or(Not(a, b), Not(b, a))
 }
