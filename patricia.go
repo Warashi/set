@@ -69,6 +69,10 @@ func (s *patricia) fullPATH() string {
 	return buf.String()
 }
 
+func (s *patricia) Empty() {
+	*s = patricia{}
+}
+
 func (s *patricia) Has(path string) bool {
 	if path == s.path {
 		return s.flag
