@@ -80,7 +80,7 @@ func (s *patricia) Has(path string) bool {
 	if len(path) < len(s.path) {
 		return false
 	}
-	idx := len(path)
+	idx := len(s.path)
 	if path[:idx] != s.path {
 		return false
 	}
@@ -130,12 +130,6 @@ func (s *patricia) Items() <-chan string {
 }
 
 func (s *patricia) Add(path string) {
-	if len(s.path) == 0 {
-		s.path = path
-		s.flag = true
-		return
-	}
-
 walk:
 	for {
 		idx := getCommonLength(path, s.path)
