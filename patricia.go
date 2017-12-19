@@ -21,36 +21,36 @@ func getCommonLength(a, b string) int {
 	return i
 }
 
-type patricia struct {
+type Patricia struct {
 	path     string
-	parent   *patricia
-	children []*patricia
+	parent   *Patricia
+	children []*Patricia
 	flag     bool
 }
 
-type stack []*patricia
+type stack []*Patricia
 
 func (s stack) Len() int {
 	return len(s)
 }
-func (s *stack) Push(p *patricia) {
+func (s *stack) Push(p *Patricia) {
 	*s = append(*s, p)
 }
-func (s *stack) Pop() *patricia {
+func (s *stack) Pop() *Patricia {
 	p := (*s)[s.Len()-1]
 	*s = (*s)[:s.Len()-1]
 	return p
 }
 
-func newPatricia(paths ...string) *patricia {
-	s := &patricia{}
+func NewPatricia(paths ...string) *Patricia {
+	s := &Patricia{}
 	for _, p := range paths {
 		s.Add(p)
 	}
 	return s
 }
 
-func (s *patricia) fullPATH() string {
+func (s *Patricia) fullPATH() string {
 	plen := 0
 	var list []string
 	for {
@@ -69,11 +69,11 @@ func (s *patricia) fullPATH() string {
 	return buf.String()
 }
 
-func (s *patricia) Empty() {
-	*s = patricia{}
+func (s *Patricia) Empty() {
+	*s = Patricia{}
 }
 
-func (s *patricia) Has(path string) bool {
+func (s *Patricia) Has(path string) bool {
 	if path == s.path {
 		return s.flag
 	}
@@ -94,7 +94,7 @@ func (s *patricia) Has(path string) bool {
 	return false
 }
 
-func (s *patricia) Len() int {
+func (s *Patricia) Len() int {
 	l := 0
 	var st stack
 	st.Push(s)
@@ -110,7 +110,7 @@ func (s *patricia) Len() int {
 	return l
 }
 
-func (s *patricia) Items() <-chan string {
+func (s *Patricia) Items() <-chan string {
 	ch := make(chan string)
 	go func() {
 		var st stack
@@ -129,7 +129,7 @@ func (s *patricia) Items() <-chan string {
 	return ch
 }
 
-func (s *patricia) Add(path string) {
+func (s *Patricia) Add(path string) {
 walk:
 	for {
 		idx := getCommonLength(path, s.path)
@@ -138,14 +138,14 @@ walk:
 			s.flag = true
 			return
 		case idx < len(s.path): // split node
-			c := &patricia{
+			c := &Patricia{
 				path:     s.path[idx:],
 				parent:   s,
 				children: s.children,
 				flag:     s.flag,
 			}
 			s.path = s.path[:idx]
-			s.children = []*patricia{c}
+			s.children = []*Patricia{c}
 			s.flag = idx == len(path)
 			return
 
@@ -160,7 +160,7 @@ walk:
 				}
 			}
 
-			c := &patricia{
+			c := &Patricia{
 				path:   path,
 				parent: s,
 				flag:   true,
@@ -172,7 +172,7 @@ walk:
 	}
 }
 
-func (s *patricia) mergeChild() {
+func (s *Patricia) mergeChild() {
 	if len(s.children) != 1 { // 子供がひとつの場合にだけマージ
 		return
 	}
@@ -186,7 +186,7 @@ func (s *patricia) mergeChild() {
 	s.flag = c.flag
 }
 
-func (s *patricia) delete() {
+func (s *Patricia) delete() {
 	s.flag = false
 	if len(s.children) > 0 {
 		return
@@ -196,7 +196,7 @@ func (s *patricia) delete() {
 	}
 
 	p := s.parent
-	children := make([]*patricia, 0, len(p.children)-1)
+	children := make([]*Patricia, 0, len(p.children)-1)
 	for _, c := range p.children {
 		if c != s {
 			children = append(children, c)
@@ -206,7 +206,7 @@ func (s *patricia) delete() {
 	p.mergeChild()
 }
 
-func (s *patricia) Delete(path string) {
+func (s *Patricia) Delete(path string) {
 	if path == s.path {
 		s.delete()
 		return
@@ -227,7 +227,7 @@ func (s *patricia) Delete(path string) {
 	}
 }
 
-func (s *patricia) Update(u Interface) {
+func (s *Patricia) Update(u Interface) {
 	for i := range u.Items() {
 		s.Add(i)
 	}
