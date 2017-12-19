@@ -196,9 +196,11 @@ func (s *patricia) delete() {
 	}
 
 	p := s.parent
-	children := make([]*patricia, len(p.children))
+	children := make([]*patricia, 0, len(p.children)-1)
 	for _, c := range p.children {
-		children = append(children, c)
+		if c != s {
+			children = append(children, c)
+		}
 	}
 	p.children = children
 	p.mergeChild()
@@ -207,11 +209,12 @@ func (s *patricia) delete() {
 func (s *patricia) Delete(path string) {
 	if path == s.path {
 		s.delete()
+		return
 	}
 	if len(path) < len(s.path) {
 		return
 	}
-	idx := len(path)
+	idx := len(s.path)
 	if path[:idx] != s.path {
 		return
 	}
