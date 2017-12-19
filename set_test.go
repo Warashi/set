@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/Warashi/set"
-	"github.com/k0kubun/pp"
 )
 
 func TestNew(t *testing.T) {
@@ -17,7 +16,6 @@ func TestNew(t *testing.T) {
 		for _, i := range e {
 			if !s.Has(i) {
 				t.Error("s does not have", i)
-				pp.Println(s)
 			}
 		}
 	}
